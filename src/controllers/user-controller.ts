@@ -1,9 +1,34 @@
-import { RequestHandler } from 'express';
 import { compare, hash } from 'bcryptjs';
+import { RequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
-import { createAccessToken, createRefreshToken } from 'src/util/auth-util';
+import { verify } from 'jsonwebtoken';
 import { User } from '../entity/User';
+import { createAccessToken, createRefreshToken, setRefreshTokenOnCookie } from '../util/auth-util';
 import { ServerErrorResponse } from './../util/default-error-response';
+
+export const refreshToken: RequestHandler = async (req, res) => {
+    const token = req.cookies.jid;
+    if (!token) {
+        return res.json({ data: { ok: false, accessToken: '' } });
+    }
+    let payload;
+    try {
+        payload = verify(token, process.env.JWT_REFRESH_SECRET || '');
+    } catch (err) {
+        return res.json({ data: { ok: false, accessToken: '', message: err.message } });
+    }
+    const user = await User.findOne({ id: (payload as any).userId });
+
+    if (!user || user.tokenVersion !== Number((payload as any).tokenVersion)) {
+        return res.json({ data: { ok: false, accessToken: '' } });
+    }
+
+    // if got here, token is valid
+    // refreshing the refresh token
+    const refreshToken = createRefreshToken(user);
+    setRefreshTokenOnCookie(res, refreshToken);
+    return res.json({ data: { ok: true, accessToken: createAccessToken({ userId: user.id }) } });
+};
 
 export const fetchAllUsers: RequestHandler = async (_req, res) => {
     res.json({ data: await User.find({ select: ['id', 'name', 'email'] }) });
@@ -42,8 +67,8 @@ export const login: RequestHandler = async (req, res, next) => {
     }
 
     // login success
-    const refreshToken = createRefreshToken({ userId: user.id });
-    res.cookie('jid', refreshToken, { httpOnly: true });
+    const refreshToken = createRefreshToken(user);
+    setRefreshTokenOnCookie(res, refreshToken);
     res.json({
         data: {
             accessToken: createAccessToken({ userId: user.id }),
