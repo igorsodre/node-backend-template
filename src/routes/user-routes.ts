@@ -1,11 +1,11 @@
 import { register, login, fetchAllUsers, refreshToken } from './../controllers/user-controller';
 import { Router } from 'express';
 import cookieParser from 'cookie-parser';
-import { isAuthenticated } from '../util/auth-util';
+// import { isAuthenticated } from '../util/auth-util';
 
 const router = Router();
 
-router.get('/', isAuthenticated, fetchAllUsers);
+router.get('/', fetchAllUsers);
 
 // router.get('/testing/:userId', async (req, res) => {
 //     const userId = req.params.userId;
