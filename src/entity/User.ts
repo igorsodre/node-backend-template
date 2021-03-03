@@ -8,7 +8,7 @@ export class User extends BaseEntity {
     @Column()
     name: string;
 
-    @Column()
+    @Column({ unique: true })
     email: string;
 
     @Column()
@@ -16,4 +16,12 @@ export class User extends BaseEntity {
 
     @Column('int', { default: 0 })
     tokenVersion: number;
+
+    getDisplayableValues = (): Partial<User> => {
+        return {
+            id: this.id,
+            email: this.email,
+            name: this.name,
+        };
+    };
 }

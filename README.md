@@ -11,10 +11,13 @@ $ exit
 $ psql -U application_user -d postgres -h 127.0.0.1 -W
 CREATE database application_database
 ```
+
 ## migrations
 
 To generate migrations after modifications on entities:
+
 `npm run typeorm migration:generate -- -n migrationName`
 
 To run the migrations:
+
 `npm run typeorm migration:run`

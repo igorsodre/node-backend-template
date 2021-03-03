@@ -1,9 +1,9 @@
-type IAppTokenFormat = {
+type IAccessTokenFormat = {
     userId: string;
     email?: string;
 };
 declare namespace Express {
     export interface Request {
-        appData?: IAppTokenFormat;
+        appData?: IAccessTokenFormat;
     }
 }
