@@ -1,12 +1,16 @@
 /* eslint-disable no-undef */
+const envType = process.env.NODE_ENV;
+const databaseurl = {
+    deveplopment: process.env.DATABASE_URL,
+    test: process.env.TEST_DATABASE_URL,
+    production: process.env.DATABASE_URL,
+};
+
 module.exports = {
     type: 'postgres',
-    url: process.env.DATABASE_URL,
-    // host: process.env.TYPEORM_HOST,
-    // port: parseInt(process.env.TYPEORM_PORT, 10) || 5432,
-    // username: process.env.TYPEORM_USERNAME,
-    // password: process.env.TYPEORM_PASSWORD,
-    // database: process.env.TYPEORM_DATABASE,
+    url: databaseurl[envType] || process.env.DATABASE_URL,
+    dropSchema: envType === 'test',
+    migrationsRun: envType === 'test',
     entities: ['src/entity/**/*.ts'],
     migrations: ['src/migration/**/*.ts'],
     subscribers: ['src/subscriber/**/*.ts'],
